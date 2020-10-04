@@ -183,7 +183,6 @@
 				4D2D53D823802CD500A7076C /* Lime */,
 				4D2D53D723802CD500A7076C /* Products */,
 				4D54C097238434D4002F8394 /* Frameworks */,
-				BA51CE2947D42D2D300DFEEE /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -286,13 +285,6 @@
 				4D7D6B172395810B0027D101 /* LMQueue.m */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		BA51CE2947D42D2D300DFEEE /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

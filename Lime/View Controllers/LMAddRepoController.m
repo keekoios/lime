@@ -17,15 +17,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    CAShapeLayer * maskLayer = [CAShapeLayer layer];
-    maskLayer.path = [UIBezierPath bezierPathWithRoundedRect: self.effectView.bounds byRoundingCorners: UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii: (CGSize){20.0, 20.0}].CGPath;
+//    CAShapeLayer * maskLayer = [CAShapeLayer layer];
+//    maskLayer.path = [UIBezierPath bezierPathWithRoundedRect: self.effectView.bounds byRoundingCorners: UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii: (CGSize){20.0, 20.0}].CGPath;
     
     self.repoURLTextField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 15, 10)];
     self.repoURLTextField.leftViewMode = UITextFieldViewModeAlways;
 
-    self.effectView.layer.mask = maskLayer;
+//    self.effectView.layer.mask = maskLayer;
     [self.repoURLTextField becomeFirstResponder];
-    self.repoURLTextField.inputAccessoryView = self.effectView;
+//    self.repoURLTextField.inputAccessoryView = self.effectView;
 }
 
 -(void)viewWillDisappear:(BOOL)animated {

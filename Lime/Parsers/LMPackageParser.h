@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LMPackageParser : NSObject
 
 - (instancetype)initWithFilePath:(NSString *)filePath repository:(nullable LMRepo *)repo;
-@property (nonatomic,retain) NSMutableArray *packages;
+@property (nonatomic,strong) NSMutableArray *packages;
 
 @end
 

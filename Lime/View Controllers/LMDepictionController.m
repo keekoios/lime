@@ -169,13 +169,14 @@
         button.frame = CGRectMake(0, 0, 74, 30);
         [button setTitleColor:[UIColor colorWithRed:1 green:1 blue:1 alpha:0.2] forState:UIControlStateHighlighted];
         [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        [button setTintColor:];
         if (self.package.installed) {
             [button setTitle:@"MORE" forState:UIControlStateNormal];
         } else {
             [button setTitle:@"GET" forState:UIControlStateNormal];
         }
         button.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        button.backgroundColor = self.view.tintColor;
+        button.backgroundColor = [UIColor systemGreenColor];
         button.layer.cornerRadius = 15.0;
         
         UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
@@ -423,6 +424,7 @@
             self.moreButton.alpha = 0;
             self.navigationItem.rightBarButtonItem.customView.hidden = NO;
             self.navigationItem.rightBarButtonItem.customView.alpha = 1;
+            self.navigationItem.backBarButtonItem.tintColor = [UIColor systemGreenColor];
         }];
     } else {
         self.navigationItem.titleView.hidden = NO;

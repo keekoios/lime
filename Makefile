@@ -8,10 +8,10 @@ package:
 	dpkg -b deb
 
 install:
-	cat deb.deb | ssh root@$(LIMEIP) "cat > /tmp/_.deb; dpkg -i /tmp/_.deb; rm /tmp/_.deb; su mobile -c sbreload"
+	scp -P 2222 deb.deb root@localhost:"/tmp"; ssh root@localhost -p 2222 "cd /tmp; dpkg -i deb.deb; uicache; sbreload"
 
 remove:
-	ssh root@$LIMEIP "apt-get remove com.citrusware.Lime; uicache"
+	ssh root@$localhost -p 2222 "apt-get remove com.citrusware.Lime; uicache"
 
 clean:
 	xcodebuild clean

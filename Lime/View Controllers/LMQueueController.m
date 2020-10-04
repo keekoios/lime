@@ -7,6 +7,8 @@
 //
 
 #import "LMQueueController.h"
+#import "LimeHelper.h"
+#import "NSTask.h"
 
 @interface LMQueueController ()
 
@@ -161,41 +163,134 @@
                     [dl downloadFileWithURLString:decodedAction.package.debURL toFile:[LimeHelper.tmpPath stringByAppendingString:[decodedAction.package.filename componentsSeparatedByString:@"/"].lastObject] completionHandler:^(NSError * _Nullable error) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             self.logView.text = [self.logView.text stringByAppendingFormat:@"\nFinished downloading %@", decodedAction.package.identifier];
-                            completedTasks++;
-                            if (completedTasks == tasks) [self finished];
+                            NSArray *lemonArgs = [NSArray arrayWithObjects:@"-i", [LimeHelper.tmpPath stringByAppendingString:[decodedAction.package.filename componentsSeparatedByString:@"/"].lastObject], nil];
+                            [LimeHelper runDPKGWithArgs:lemonArgs textView:self.logView completionHandler:^(NSTask * _Nonnull task) {
+                                if (task.terminationStatus != 0) {
+                                    
+                                } else {
+                                    completedTasks++;
+                                    if (completedTasks == tasks) {
+                                        //Testing only
+                                        dispatch_after(DISPATCH_TIME_NOW + 1, dispatch_get_main_queue(), ^{
+                                            [self finished];
+                                        });
+                                    }
+                                }
+                            }];
+//                            completedTasks++;
+                            
                         });
                     }];
                 });
+            } else {
+                self.logView.text = @"Cant Download Package...";
             }
+            
         } else if (decodedAction.action == 1) {
-            self.logView.text = [self.logView.text stringByAppendingString:@"\nLime can't remove packages yet."];
+            LMQueueAction *decodedAction = [NSKeyedUnarchiver unarchiveObjectWithData:encodedAction];
+            if (decodedAction.package.identifier) {
+                self.logView.text = [self.logView.text stringByAppendingFormat:@"\nPreparing to remove %@", decodedAction.package.identifier];
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSArray *lemonArgs = [NSArray arrayWithObjects:@"remove", decodedAction.package.identifier, @"-y", nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [LimeHelper runAPTWithArguments:lemonArgs textView:self.logView completionHandler:^(NSTask * _Nonnull task) {
+                            if (task.terminationStatus != 0) {
+                                
+                            } else {
+                                completedTasks++;
+                                if (completedTasks == tasks) {
+                                    //Testing only
+                                    dispatch_after(DISPATCH_TIME_NOW + 1, dispatch_get_main_queue(), ^{
+                                        [self finished];
+                                    });
+                                }
+                            }
+                        }];
+                    });
+                    
+                });
+            } else {
+                self.logView.text = @"Error....Please Try Again";
+            }
         } else if (decodedAction.action == 2) {
-            self.logView.text = [self.logView.text stringByAppendingString:@"\nLime can't reinstall packages yet."];
+            LMQueueAction *decodedAction = [NSKeyedUnarchiver unarchiveObjectWithData:encodedAction];
+            if (decodedAction.package.identifier) {
+                self.logView.text = [self.logView.text stringByAppendingFormat:@"\nPreparing to reinstall %@\n", decodedAction.package.identifier];
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSArray *lemonArgs = [NSArray arrayWithObjects:@"reinstall", decodedAction.package.identifier, @"-y", @"--allow-unauthenticated", nil];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [LimeHelper runAPTWithArguments:lemonArgs textView:self.logView completionHandler:^(NSTask * _Nonnull task) {
+                            if (task.terminationStatus != 0) {
+                                
+                            } else {
+                                completedTasks++;
+                                if (completedTasks == tasks) {
+                                    //Testing only
+                                    dispatch_after(DISPATCH_TIME_NOW + 1, dispatch_get_main_queue(), ^{
+                                        [self finished];
+                                    });
+                                }
+                            }
+                        }];
+                    });
+                    
+                });
+            } else {
+                self.logView.text = @"Error....Please Try Again";
+            }
         }
     };
     NSLog(@"[Queue] DONE!");
-    //[NSFileManager.defaultManager removeItemAtPath:LimeHelper.tmpPath error:nil];
+//    [NSFileManager.defaultManager removeItemAtPath:LimeHelper.tmpPath error:nil];
 }
 
 -(void)finished {
-    _state = 2;
-    [[NSUserDefaults standardUserDefaults] setObject:[NSArray new] forKey:@"queue"];
-    [UIView animateWithDuration:0.2f animations:^{
-        self.actionButton.alpha = 1;
-        self.actionButton.enabled = YES;
-        
-        self.arrowIMG.alpha = 1;
-        
-        self.effectView.frame = self.logViewFrame;
-        self.effectView.layer.cornerRadius = 20;
-        
-        self.completeView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width / 2 - self.completeView.frame.size.width / 2, self.completeView.frame.origin.y, self.completeView.frame.size.width, self.completeView.frame.size.height);
-        
-        self.logView.frame = CGRectMake(0 - [UIScreen mainScreen].bounds.size.width, self.logView.frame.origin.y, self.logView.frame.size.width, self.logView.frame.size.height);
-        
-        [self.actionButton setTitle:@"Respring" forState:UIControlStateNormal];
-    }];
     
+    if (self.isError) {
+        _state = 2;
+        [[NSUserDefaults standardUserDefaults] setObject:[NSArray new] forKey:@"queue"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIView animateWithDuration:0.2f animations:^{
+                self.actionButton.alpha = 1;
+                self.actionButton.enabled = YES;
+                
+                self.arrowIMG.alpha = 1;
+                
+                self.effectView.frame = self.logViewFrame;
+                self.effectView.layer.cornerRadius = 20;
+                
+                self.completeView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width / 2 - self.completeView.frame.size.width / 2, self.completeView.frame.origin.y, self.completeView.frame.size.width, self.completeView.frame.size.height);
+                
+                self.logView.frame = CGRectMake(0 - [UIScreen mainScreen].bounds.size.width, self.logView.frame.origin.y, self.logView.frame.size.width, self.logView.frame.size.height);
+                
+                [self.actionButton setTitle:@"Respring" forState:UIControlStateNormal];
+                [self.actionButton setBackgroundColor:[UIColor systemGreenColor]];
+                [self.actionButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            }];
+        });
+    } else {
+        _state = 2;
+        [[NSUserDefaults standardUserDefaults] setObject:[NSArray new] forKey:@"queue"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIView animateWithDuration:0.2f animations:^{
+                self.actionButton.alpha = 1;
+                self.actionButton.enabled = YES;
+                
+                self.arrowIMG.alpha = 1;
+                
+                self.effectView.frame = self.logViewFrame;
+                self.effectView.layer.cornerRadius = 20;
+                
+                self.completeView.frame = CGRectMake([UIScreen mainScreen].bounds.size.width / 2 - self.completeView.frame.size.width / 2, self.completeView.frame.origin.y, self.completeView.frame.size.width, self.completeView.frame.size.height);
+                
+                self.logView.frame = CGRectMake(0 - [UIScreen mainScreen].bounds.size.width, self.logView.frame.origin.y, self.logView.frame.size.width, self.logView.frame.size.height);
+                
+                [self.actionButton setTitle:@"Respring" forState:UIControlStateNormal];
+                [self.actionButton setBackgroundColor:[UIColor systemGreenColor]];
+                [self.actionButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            }];
+        });
+    }
 }
 
 - (IBAction)close:(id)sender {

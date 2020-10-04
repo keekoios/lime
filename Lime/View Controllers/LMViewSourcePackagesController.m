@@ -14,6 +14,16 @@
 
 @implementation LMViewSourcePackagesController
 
+- (void) removeOldPackageVersion {
+    [self.repo.packages enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(LMPackage * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSArray *sameBundle = [self.repo.packages valueForKey:obj.identifier];
+        NSInteger *pkgVersion = [obj.version integerValue];
+        [sameBundle enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(id  _Nonnull pkg, NSUInteger index, BOOL * _Nonnull stop) {
+            
+        }];
+    }];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = self.repo.parsedRepo.label;

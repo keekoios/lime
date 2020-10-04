@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)iconsPath;
 + (NSString *)tmpPath;
 + (void)runLemonWithArguments:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler;
++ (void)runDPKGWithArgs:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler;
++(void)runAPTWithArguments:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler;
 - (void)refreshInstalledPackagesWithCompletionHandler:(nullable void(^)(void))completion;
 + (NSMutableURLRequest *)mutableURLRequestWithHeadersWithURLString:(NSString *)URLString;
 + (void)respringDevice;

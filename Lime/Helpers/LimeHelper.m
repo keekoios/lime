@@ -103,9 +103,53 @@ extern char **environ;
     [task launch];
 }
 
-+(void)runLemonWithArguments:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler {
+
++(void)runDPKGWithArgs:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler {
+    
+    NSTask *dpkgTask = [[NSTask alloc] init];
+    [dpkgTask setLaunchPath:@"/usr/bin/dpkg"];
+    [dpkgTask setArguments:args];
+    dpkgTask.terminationHandler = ^(NSTask *task) {
+        if (completionHandler) completionHandler(task);
+    };
+    
+    
+    NSMutableDictionary *defaultEnv = [[NSMutableDictionary alloc] initWithDictionary:[[NSProcessInfo processInfo] environment]];
+    [defaultEnv setObject:@"YES" forKey:@"NSUnbufferedIO"] ;
+    dpkgTask.environment = defaultEnv;
+    
+    NSPipe *stdoutPipe = [NSPipe pipe];
+    dpkgTask.standardOutput = stdoutPipe;
+    NSPipe *stderrPipe = [NSPipe pipe];
+    dpkgTask.standardError = stderrPipe;
+    
+if (textView) {
+    [[dpkgTask.standardOutput fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file) {
+        NSData *data = [file availableData];
+        NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+            textView.text = [textView.text stringByAppendingString:string];
+            [textView scrollRangeToVisible:NSMakeRange(textView.text.length, 0)];
+        });
+    }];
+    [[dpkgTask.standardError fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file) {
+        NSData *data = [file availableData];
+        NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+            textView.text = [textView.text stringByAppendingString:string];
+            [textView scrollRangeToVisible:NSMakeRange(textView.text.length, 0)];
+        });
+    }];
+}
+[dpkgTask launch];
+    
+};
+
++(void)runAPTWithArguments:(NSArray *)args textView:(UITextView *)textView completionHandler:(nullable void(^)(NSTask *task))completionHandler {
     NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/usr/bin/lemon"];
+    [task setLaunchPath:@"/usr/bin/apt"];
     [task setArguments:args];
     task.terminationHandler = ^(NSTask *task){
         if (completionHandler) completionHandler(task);
@@ -123,7 +167,8 @@ extern char **environ;
         [[task.standardOutput fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file) {
             NSData *data = [file availableData];
             NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                
+            NSString *pipeString = [string stringByAppendingString:@"\n"];
+            
             dispatch_async(dispatch_get_main_queue(), ^(void){
                 textView.text = [textView.text stringByAppendingString:string];
                 [textView scrollRangeToVisible:NSMakeRange(textView.text.length, 0)];
@@ -132,7 +177,8 @@ extern char **environ;
         [[task.standardError fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file) {
             NSData *data = [file availableData];
             NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                
+            NSString *pipeString = [string stringByAppendingString:@"\n"];
+
             dispatch_async(dispatch_get_main_queue(), ^(void){
                 textView.text = [textView.text stringByAppendingString:string];
                 [textView scrollRangeToVisible:NSMakeRange(textView.text.length, 0)];

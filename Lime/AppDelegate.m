@@ -18,6 +18,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [LMSourceManager sharedInstance];
     NSLog(@"[Info] Lime did finish loading");
+    setuid(0);
+    setgid(0);
     return YES;
 }
 

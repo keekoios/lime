@@ -31,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) NSInteger state;
 @property (nonatomic) NSInteger tasks;
+@property (nonatomic) BOOL isError;
 
 @end
 
